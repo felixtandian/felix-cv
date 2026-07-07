@@ -6,6 +6,8 @@ Every developer has a story. Mine is told the way I'd want to read it: as a ques
 
 **Lv.28 · Frontend & Mobile App Developer · Jakarta, ID**
 
+![Felix Tandian — Character Sheet](public/og.png)
+
 ---
 
 ## 🗺 What's Inside

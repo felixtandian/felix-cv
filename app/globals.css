@@ -41,3 +41,13 @@ body {
 .torch-glow {
   animation: flicker 2.4s ease-in-out infinite;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .torch-glow {
+    animation: none;
+    text-shadow: 0 0 18px rgb(212 175 55 / 0.35);
+  }
+}

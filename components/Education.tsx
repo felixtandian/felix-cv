@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Section from "./Section";
+import Tilt from "./Tilt";
 import { popIn, stagger } from "./motion";
 
 const coursework = [
@@ -17,7 +18,7 @@ const coursework = [
 export default function Education() {
   return (
     <Section id="education" title="TRAINING GROUNDS" from="left">
-      <div className="panel p-6 text-center sm:p-8">
+      <Tilt className="panel p-6 text-center sm:p-8">
         <p className="font-display text-lg font-bold tracking-wider text-stone-100">
           UNIVERSITY OF BINA NUSANTARA
         </p>
@@ -45,7 +46,7 @@ export default function Education() {
             </motion.li>
           ))}
         </motion.ul>
-      </div>
+      </Tilt>
     </Section>
   );
 }
