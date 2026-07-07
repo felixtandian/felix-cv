@@ -1,11 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import Sprite from "./Sprite";
 
 /*
- * Pixel sprites drawn as text grids — each char is a palette key,
- * "." is transparent. Party frames: a/b = walk cycle, cast = skill pose.
- * All sprites face RIGHT; walking left is a scaleX(-1) mirror.
+ * Patrol diorama pinned to the viewport bottom, set in ancient ruins.
+ * The party marches back and forth across the screen; occasionally a
+ * monster gives chase for a leg and everyone runs. Click a party member
+ * to turn and cast — one landed hit fells the chaser (the priest heals).
+ *
+ * Sprites are text grids — each char is a palette key, "." transparent.
+ * Party sprites face RIGHT, enemies face LEFT; the whole formation is
+ * flipped when marching left so sprites always face the direction of
+ * travel (the dragon is drawn facing right and gets the opposite mirror).
  */
 
 type Frames = { a: string[]; b: string[]; cast: string[] };
@@ -260,213 +267,395 @@ const priest: Character = {
   },
 };
 
-/* the party marches in this order; knight leads the way right */
-const PARTY = [priest, mage, archer, knight];
+/* flight order: knight guards the rear, nearest the chaser */
+const PARTY = [knight, archer, mage, priest];
 
-const dragonPalette = {
-  r: "#8a2323",
-  R: "#c94f4f",
-  w: "#5c1616",
-  e: "#f5d67b",
+/* ---------- enemies (drawn facing LEFT, toward the party) ---------- */
+
+type Enemy = {
+  name: string;
+  palette: Record<string, string>;
+  frames: { a: string[]; b: string[] };
+  px?: number;
+  fly?: boolean;
+  facesRight?: boolean; // drawn facing right — skip the chase mirror
 };
 
-const dragonFrames = {
-  a: [
-    ".....ww...........",
-    "....wwww..........",
-    "...wwwwww...rrrrr.",
-    "..rrwwwww...rrrer.",
-    ".rrrrrrrrrrrrrrrr.",
-    ".rRRRRRRRRRRRrrr..",
-    "..rRRRRRRRRRr.....",
-    "...rr...rr........",
-    "...rr...rr........",
-    "..................",
-  ],
-  b: [
-    "..................",
-    "....wwww..........",
-    "...wwwwww...rrrrr.",
-    "..rrwwwww...rrrer.",
-    ".rrrrrrrrrrrrrrrr.",
-    ".rRRRRRRRRRRRrrr..",
-    "..rRRRRRRRRRr.....",
-    "...rr...rr........",
-    "...rr...rr........",
-    "..................",
-  ],
+const slime: Enemy = {
+  name: "slime",
+  palette: { g: "#3fa5a0", G: "#2b7b77", e: "#1a1512" },
+  frames: {
+    a: [
+      "...gggg...",
+      "..gggggg..",
+      ".gggggggg.",
+      ".gegggegg.",
+      ".gggggggg.",
+      ".GGGGGGGG.",
+    ],
+    b: [
+      "..........",
+      "..gggggg..",
+      ".gggggggg.",
+      "ggegggeggg",
+      "gggggggggg",
+      "GGGGGGGGGG",
+    ],
+  },
 };
+
+const goblin: Enemy = {
+  name: "goblin",
+  palette: { n: "#4a7c36", d: "#4a3b2a", e: "#c0392b", w: "#cfd6dd" },
+  frames: {
+    a: [
+      "....nnnn....",
+      "...nnnnnn...",
+      "...ennnnn...",
+      "...nnnnnn...",
+      "....dddd....",
+      "...dddddd...",
+      ".w.dddddd...",
+      "..ndddddd...",
+      "....dddd....",
+      "...nn..nn...",
+      "...nn..nn...",
+      "..nnn..nnn..",
+    ],
+    b: [
+      "....nnnn....",
+      "...nnnnnn...",
+      "...ennnnn...",
+      "...nnnnnn...",
+      "....dddd....",
+      "...dddddd...",
+      ".w.dddddd...",
+      "..ndddddd...",
+      "....dddd....",
+      "....nn.nn...",
+      "....nn.nn...",
+      "...nnn.nnn..",
+    ],
+  },
+};
+
+const bat: Enemy = {
+  name: "bat",
+  palette: { p: "#7e57c2", e: "#f5d67b" },
+  fly: true,
+  frames: {
+    a: [
+      ".pp......pp.",
+      ".ppp....ppp.",
+      "..pppppppp..",
+      "..peppppep..",
+      "..pppppppp..",
+      "...p.pp.p...",
+      "............",
+    ],
+    b: [
+      "............",
+      "..p......p..",
+      ".pppppppppp.",
+      "..peppppep..",
+      "..pppppppp..",
+      "...p.pp.p...",
+      "............",
+    ],
+  },
+};
+
+const skeleton: Enemy = {
+  name: "skeleton",
+  palette: { k: "#d8d3c3", e: "#1a1512", d: "#4a4438", w: "#cfd6dd" },
+  frames: {
+    a: [
+      "....kkkk....",
+      "...kkkkkk...",
+      "...ekkkke...",
+      "...kkkkkk...",
+      "....kkkk....",
+      "...kkkkkk...",
+      ".w.kkkkkk...",
+      ".wkkdkkdkk..",
+      "...kdkkdk...",
+      "....kkkk....",
+      "...kk..kk...",
+      "...kk..kk...",
+      "..kkk..kkk..",
+    ],
+    b: [
+      "....kkkk....",
+      "...kkkkkk...",
+      "...ekkkke...",
+      "...kkkkkk...",
+      "....kkkk....",
+      "...kkkkkk...",
+      ".w.kkkkkk...",
+      ".wkkdkkdkk..",
+      "...kdkkdk...",
+      "....kkkk....",
+      "....kk.kk...",
+      "....kk.kk...",
+      "...kkk.kkk..",
+    ],
+  },
+};
+
+/* rare boss — already drawn facing right, so it needs no chase mirror */
+const dragon: Enemy = {
+  name: "dragon",
+  palette: { r: "#8a2323", R: "#c94f4f", w: "#5c1616", e: "#f5d67b" },
+  px: 5,
+  fly: true,
+  facesRight: true,
+  frames: {
+    a: [
+      ".....ww...........",
+      "....wwww..........",
+      "...wwwwww...rrrrr.",
+      "..rrwwwww...rrrer.",
+      ".rrrrrrrrrrrrrrrr.",
+      ".rRRRRRRRRRRRrrr..",
+      "..rRRRRRRRRRr.....",
+      "...rr...rr........",
+      "...rr...rr........",
+      "..................",
+    ],
+    b: [
+      "..................",
+      "....wwww..........",
+      "...wwwwww...rrrrr.",
+      "..rrwwwww...rrrer.",
+      ".rrrrrrrrrrrrrrrr.",
+      ".rRRRRRRRRRRRrrr..",
+      "..rRRRRRRRRRr.....",
+      "...rr...rr........",
+      "...rr...rr........",
+      "..................",
+    ],
+  },
+};
+
+const ENEMIES = [slime, goblin, bat, skeleton];
+
+/* ---------- ruins backdrop (silhouettes behind the fighters) ---------- */
+
+const ruinPalette = { p: "#c2ae76" };
+
+const brokenColumn = [
+  "..p.p...",
+  "..ppp...",
+  "..pppp..",
+  "..pppp..",
+  "..pppp..",
+  "..pppp..",
+  "..pppp..",
+  "..pppp..",
+  "..pppp..",
+  "..pppp..",
+  "..pppp..",
+  "..pppp..",
+  "..pppp..",
+  "..pppp..",
+  ".pppppp.",
+  "pppppppp",
+];
+
+const stump = [
+  ".p.pp...",
+  ".pppp...",
+  ".ppppp..",
+  ".ppppp..",
+  ".ppppp..",
+  "pppppppp",
+  "pppppppp",
+];
+
+const arch = [
+  "pppppppppp....pp..",
+  "pppppppppppp..ppp.",
+  ".ppp..........ppp.",
+  ".ppp..........ppp.",
+  ".ppp..........ppp.",
+  ".ppp..........ppp.",
+  ".ppp..........ppp.",
+  ".ppp..........ppp.",
+  ".ppp..........ppp.",
+  ".ppp..........ppp.",
+  ".ppp..........ppp.",
+  ".ppp..........ppp.",
+  "pppp..........pppp",
+  "pppp..........pppp",
+];
+
+const RUINS: { rows: string[]; left: string }[] = [
+  { rows: brokenColumn, left: "4%" },
+  { rows: arch, left: "22%" },
+  { rows: stump, left: "43%" },
+  { rows: brokenColumn, left: "58%" },
+  { rows: stump, left: "74%" },
+  { rows: arch, left: "88%" },
+];
 
 // sanity check the hand-drawn grids in dev — a bad row silently shifts the sprite
 if (process.env.NODE_ENV !== "production") {
-  const check = (name: string, rows: string[], w: number) =>
+  const check = (name: string, rows: string[]) =>
     console.assert(
-      rows.every((r) => r.length === w),
+      rows.every((r) => r.length === rows[0].length),
       `bad sprite grid: ${name}`
     );
   for (const c of PARTY)
-    for (const [key, rows] of Object.entries(c.frames)) check(`${c.name}.${key}`, rows, 12);
-  check("dragon.a", dragonFrames.a, 18);
-  check("dragon.b", dragonFrames.b, 18);
-}
-
-function Sprite({
-  rows,
-  palette,
-  px = 4,
-}: {
-  rows: string[];
-  palette: Record<string, string>;
-  px?: number;
-}) {
-  return (
-    <svg
-      width={rows[0].length * px}
-      height={rows.length * px}
-      shapeRendering="crispEdges"
-      aria-hidden
-    >
-      {rows.flatMap((row, y) =>
-        [...row].map((ch, x) =>
-          ch === "." ? null : (
-            <rect
-              key={`${x}-${y}`}
-              x={x * px}
-              y={y * px}
-              width={px}
-              height={px}
-              fill={palette[ch]}
-            />
-          )
-        )
-      )}
-    </svg>
-  );
+    for (const [key, rows] of Object.entries(c.frames)) check(`${c.name}.${key}`, rows);
+  for (const e of [...ENEMIES, dragon])
+    for (const [key, rows] of Object.entries(e.frames)) check(`${e.name}.${key}`, rows);
+  check("brokenColumn", brokenColumn);
+  check("stump", stump);
+  check("arch", arch);
 }
 
 function Adventurer({
   c,
   frame,
-  canCast,
+  casting,
+  castId,
+  onCast,
 }: {
   c: Character;
   frame: number;
-  canCast: boolean;
+  casting: boolean;
+  castId: number;
+  onCast: () => void;
 }) {
-  const [casting, setCasting] = useState(false);
-  const [castId, setCastId] = useState(0);
-
-  useEffect(() => {
-    if (!canCast) {
-      setCasting(false);
-      return;
-    }
-    let stopped = false;
-    let timer: ReturnType<typeof setTimeout>;
-    const scheduleCast = () => {
-      timer = setTimeout(() => {
-        if (stopped) return;
-        setCasting(true);
-        setCastId((i) => i + 1);
-        setTimeout(() => !stopped && setCasting(false), 900);
-        scheduleCast();
-      }, 4000 + Math.random() * 6000);
-    };
-    scheduleCast();
-    return () => {
-      stopped = true;
-      clearTimeout(timer);
-    };
-  }, [canCast]);
-
   const rows = casting ? c.frames.cast : frame ? c.frames.b : c.frames.a;
-
+  // attackers turn back toward the chaser to cast; the heal stays forward
+  const turned = casting && c.fx !== "heal";
   return (
-    <div className="relative">
-      <Sprite rows={rows} palette={c.palette} />
-      {casting && <span key={castId} className={`fx fx-${c.fx}`} />}
+    <div
+      className="char-hop pointer-events-auto relative cursor-pointer"
+      onClick={onCast}
+      title={c.name}
+    >
+      <div
+        className="relative"
+        style={turned ? { transform: "scaleX(-1)" } : undefined}
+      >
+        <Sprite rows={rows} palette={c.palette} />
+        {casting && <span key={castId} className={`fx fx-${c.fx}`} />}
+      </div>
     </div>
   );
 }
 
 export default function PixelParty() {
-  const [mode, setMode] = useState<"patrol" | "chase">("patrol");
-  const [facing, setFacing] = useState<1 | -1>(1); // 1 = walking right
   const [frame, setFrame] = useState(0);
-  const patrolRef = useRef<HTMLDivElement>(null);
+  const [heading, setHeading] = useState(1); // 1 = marching right, -1 = left
+  const [chaser, setChaser] = useState<Enemy | null>(null);
+  const [dead, setDead] = useState(false);
+  const [casterIdx, setCasterIdx] = useState(-1);
+  const [castId, setCastId] = useState(0);
 
-  // shared walk cycle so the party marches in step; they sprint when chased
+  // shared 2-frame cycle: marching legs, wing flaps, slime squish —
+  // everyone hustles when a monster is on their heels
   useEffect(() => {
-    const iv = setInterval(() => setFrame((f) => f ^ 1), mode === "chase" ? 140 : 280);
+    const iv = setInterval(() => setFrame((f) => f ^ 1), chaser ? 150 : 280);
     return () => clearInterval(iv);
-  }, [mode]);
+  }, [chaser]);
 
-  // the patrol animation alternates; each finished leg = turn around
-  useEffect(() => {
-    const el = patrolRef.current;
-    if (!el) return;
-    const onIteration = (e: AnimationEvent) => {
-      if (e.animationName === "patrol") setFacing((f) => (f === 1 ? -1 : 1));
-    };
-    el.addEventListener("animationiteration", onIteration);
-    return () => el.removeEventListener("animationiteration", onIteration);
-  }, [mode]);
+  // one cast: turn, pose + effect; an offensive hit fells the chaser
+  const castAs = (idx: number) => {
+    setCasterIdx(idx);
+    setCastId((i) => i + 1);
+    setTimeout(() => setCasterIdx((cur) => (cur === idx ? -1 : cur)), 900);
+    if (PARTY[idx].fx !== "heal") setTimeout(() => setDead(true), 450);
+  };
 
-  // rare event: a dragon shows up and the party legs it across the screen
-  useEffect(() => {
-    let stopped = false;
-    let timer: ReturnType<typeof setTimeout>;
-    const scheduleChase = () => {
-      timer = setTimeout(() => {
-        if (stopped) return;
-        setMode("chase");
-        setTimeout(() => {
-          if (stopped) return;
-          setFacing(1);
-          setMode("patrol");
-          scheduleChase();
-        }, 8000);
-      }, 30000 + Math.random() * 45000);
-    };
-    scheduleChase();
-    return () => {
-      stopped = true;
-      clearTimeout(timer);
-    };
-  }, []);
+  // at each edge: turn around, and occasionally a monster gives chase
+  // (never the same one twice in a row; the dragon is the rare boss)
+  const nextLeg = () => {
+    setHeading((h) => -h);
+    setDead(false);
+    setChaser((cur) => {
+      if (Math.random() >= 0.3) return null; // calm patrol leg
+      if (cur !== dragon && Math.random() < 0.12) return dragon;
+      const pool = ENEMIES.filter((e) => e !== cur);
+      return pool[Math.floor(Math.random() * pool.length)];
+    });
+  };
 
   return (
     <div
       aria-hidden
       className="pixel-party pointer-events-none fixed inset-x-0 bottom-0 z-30 h-24 overflow-hidden"
     >
-      {mode === "patrol" ? (
-        <div ref={patrolRef} className="party-patrol">
-          {/* mirror the whole row when walking left: order + facing flip together */}
-          <div
-            className="flex items-end gap-2"
-            style={{ transform: `scaleX(${facing})` }}
-          >
-            {PARTY.map((c) => (
-              <Adventurer key={c.name} c={c} frame={frame} canCast />
+      {/* crumbled ruins on the horizon */}
+      {RUINS.map((r, i) => (
+        <div key={i} className="absolute bottom-0" style={{ left: r.left }}>
+          <Sprite rows={r.rows} palette={ruinPalette} />
+        </div>
+      ))}
+
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gold/20" />
+
+      {/* one leg per crossing; a chase leg runs the same path, just faster.
+          Flipping the inner group turns the whole formation around, monster
+          included, so every sprite faces the direction of travel. */}
+      <div
+        className={`absolute bottom-0 left-0 flex items-end will-change-transform ${
+          heading > 0 ? "leg-right" : "leg-left"
+        }`}
+        style={{ animationDuration: chaser ? "13s" : "34s" }}
+        onAnimationEnd={(e) => {
+          if (e.animationName === "leg-right" || e.animationName === "leg-left")
+            nextLeg();
+        }}
+      >
+        <div
+          className="relative"
+          style={heading < 0 ? { transform: "scaleX(-1)" } : undefined}
+        >
+          <div className="flex items-end gap-2">
+            {PARTY.map((c, i) => (
+              <Adventurer
+                key={c.name}
+                c={c}
+                frame={frame}
+                casting={i === casterIdx}
+                castId={castId}
+                onCast={() => castAs(i)}
+              />
             ))}
           </div>
-        </div>
-      ) : (
-        <div className="party-chase">
-          <div className="flex items-end gap-6">
-            <div className="dragon-fly relative mb-6">
-              <Sprite rows={frame ? dragonFrames.b : dragonFrames.a} palette={dragonPalette} px={5} />
-              <span className="fx fx-fire" />
+
+          {/* monster at their heels — outside the flex flow so calm legs
+              keep the same formation; a felled one stays down for the leg */}
+          {chaser && (
+            <div
+              className={`absolute bottom-0 ${dead ? "enemy-die" : ""}`}
+              style={{ right: "calc(100% + 28px)" }}
+            >
+              <div
+                className={chaser.fly ? "fly-bob relative mb-5" : "relative"}
+              >
+                <div
+                  style={
+                    chaser.facesRight ? undefined : { transform: "scaleX(-1)" }
+                  }
+                >
+                  <Sprite
+                    rows={frame ? chaser.frames.b : chaser.frames.a}
+                    palette={chaser.palette}
+                    px={chaser.px ?? 4}
+                  />
+                </div>
+                {chaser.name === "dragon" && !dead && (
+                  <span className="fx fx-fire" />
+                )}
+              </div>
             </div>
-            <div className="flex items-end gap-2">
-              {PARTY.map((c) => (
-                <Adventurer key={c.name} c={c} frame={frame} canCast={false} />
-              ))}
-            </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

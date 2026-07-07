@@ -3,10 +3,12 @@ import Skills from "@/components/Skills";
 import Experience from "@/components/Experience";
 import Education from "@/components/Education";
 import PixelParty from "@/components/PixelParty";
+import RuinsBackdrop from "@/components/RuinsBackdrop";
 
 export default function Home() {
   return (
     <main className="overflow-x-hidden">
+      <RuinsBackdrop />
       <Hero />
       <Skills />
       <Experience />

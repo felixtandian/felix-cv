@@ -49,7 +49,7 @@ export default function Skills() {
             <motion.li
               key={t}
               variants={popIn}
-              className="border border-gold/40 bg-black/30 px-4 py-2 text-sm text-stone-300"
+              className="border border-gold/40 bg-gold/10 px-4 py-2 text-sm text-stone-300"
             >
               ✦ {t}
             </motion.li>

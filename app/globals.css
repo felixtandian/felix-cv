@@ -1,13 +1,18 @@
 @import "tailwindcss";
 
-/* Tailwind v4 theme config — RPG palette + fonts (wired to next/font variables) */
+/* Tailwind v4 theme config — sky-and-stone palette: open day-cycle sky,
+   weathered ruins, parchment panels (gold/amber are bronze inks) */
 @theme {
-  --color-gold: #d4af37;
-  --color-amber: #f5d67b;
-  --color-hp: #b0413e;
-  --color-mana: #3e6bb0;
-  --color-night: #14110c;
-  --color-panel: #1f1a12;
+  --color-gold: #8a6b29;
+  --color-amber: #6b511a;
+  --color-hp: #c05b45;
+  --color-sky: #6f9ec2;
+  /* stone-* remapped to ink-on-parchment — 100 = darkest / highest emphasis */
+  --color-stone-100: #332c1c;
+  --color-stone-200: #3d3524;
+  --color-stone-300: #4a4029;
+  --color-stone-400: #5a4f38;
+  --color-stone-500: #5f5540;
   --font-display: var(--font-cinzel), serif;
   --font-body: var(--font-inter), sans-serif;
 }
@@ -17,20 +22,19 @@ html {
 }
 
 body {
-  /* candle-lit vignette */
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgb(212 175 55 / 0.07), transparent),
-    var(--color-night);
+  /* the fixed backdrop paints the real sky gradient (it must be
+     viewport-sized, not page-sized); this is the overscroll fallback */
+  background: var(--color-sky);
 }
 
-/* dark parchment panel with gold trim */
+/* sandstone panel with bronze trim */
 .panel {
-  background: linear-gradient(160deg, #241d13, #17130c);
-  border: 1px solid rgb(212 175 55 / 0.35);
+  background: linear-gradient(160deg, #e7daab, #d3c188);
+  border: 1px solid rgb(138 107 41 / 0.45);
   border-radius: 4px;
   box-shadow:
-    inset 0 0 24px rgb(0 0 0 / 0.55),
-    0 4px 16px rgb(0 0 0 / 0.5);
+    inset 0 1px 0 rgb(255 251 230 / 0.5),
+    0 4px 14px rgb(61 53 36 / 0.22);
 }
 
 /* torchlight flicker on the hero title glow */
@@ -44,42 +48,110 @@ body {
 
 /* --- pixel adventurer party --- */
 
-/* party walks border to border, then turns around (alternate) */
-.party-patrol {
-  position: absolute;
-  bottom: 0;
+/* party members hop when hovered */
+.char-hop:hover {
+  animation: char-hop 0.35s ease-out;
+}
+
+@keyframes char-hop {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-7px); }
+  70% { transform: translateY(2px); }
+}
+
+/* patrol legs, edge to edge; a chase leg is the same path run faster
+   (the duration comes inline from the component) */
+.leg-right {
+  animation: leg-right 34s linear forwards;
+}
+
+.leg-left {
+  animation: leg-left 34s linear forwards;
+}
+
+@keyframes leg-right {
+  from { transform: translateX(2vw); }
+  to { transform: translateX(calc(98vw - 220px)); }
+}
+
+@keyframes leg-left {
+  from { transform: translateX(calc(98vw - 220px)); }
+  to { transform: translateX(2vw); }
+}
+
+/* full-page sky: one day = 90s, day → sunset → midnight → dawn */
+.sky-cycle {
+  animation: daynight 90s linear infinite;
+}
+
+@keyframes daynight {
+  0%, 34% { background-color: rgb(212 175 55 / 0.08); }
+  45% { background-color: rgb(216 98 42 / 0.18); }
+  55%, 85% { background-color: rgb(18 28 58 / 0.28); }
+  95% { background-color: rgb(146 106 146 / 0.12); }
+  100% { background-color: rgb(212 175 55 / 0.08); }
+}
+
+/* sun and moon arc over the open middle sky, setting behind the side ruins */
+.sun {
+  top: 0;
   left: 0;
-  animation: patrol 26s linear infinite alternate;
-  will-change: transform;
+  width: 12px;
+  height: 12px;
+  opacity: 0;
+  background: #f5d67b;
+  box-shadow: 0 0 16px 3px rgb(245 214 123 / 0.7);
+  animation: sun-arc 90s linear infinite;
 }
 
-@keyframes patrol {
-  from { transform: translateX(12px); }
-  to { transform: translateX(calc(100vw - 100% - 12px)); }
+@keyframes sun-arc {
+  0% { transform: translate(4vw, 70vh); opacity: 0; }
+  6% { opacity: 1; }
+  22% { transform: translate(48vw, 6vh); }
+  44% { transform: translate(92vw, 70vh); opacity: 1; }
+  48%, 100% { opacity: 0; transform: translate(4vw, 70vh); }
 }
 
-/* dragon chase: one sprint across the screen */
-.party-chase {
-  position: absolute;
-  bottom: 0;
+.moon {
+  top: 0;
   left: 0;
-  animation: chase 8s linear forwards;
-  will-change: transform;
+  width: 10px;
+  height: 10px;
+  opacity: 0;
+  background: #b9c4d4;
+  box-shadow: 0 0 12px 2px rgb(185 196 212 / 0.6);
+  animation: moon-arc 90s linear infinite;
 }
 
-@keyframes chase {
-  from { transform: translateX(-420px); }
-  to { transform: translateX(100vw); }
+@keyframes moon-arc {
+  0%, 50% { transform: translate(4vw, 70vh); opacity: 0; }
+  56% { opacity: 1; }
+  72% { transform: translate(48vw, 6vh); }
+  93% { transform: translate(92vw, 70vh); opacity: 1; }
+  97%, 100% { opacity: 0; transform: translate(4vw, 70vh); }
 }
 
-/* the dragon flies: gentle airborne bob, wings do the rest */
-.dragon-fly {
+/* flying enemies bob in place; wings do the rest */
+.fly-bob {
   animation: hover-bob 1.4s ease-in-out infinite;
 }
 
 @keyframes hover-bob {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-9px); }
+}
+
+/* enemy defeated: retro flicker-out */
+.enemy-die {
+  animation: enemy-die 0.8s steps(4) forwards;
+}
+
+@keyframes enemy-die {
+  to {
+    opacity: 0;
+    transform: translateY(6px);
+    filter: brightness(2.5);
+  }
 }
 
 /* dragon breath: flickering pixel flames at the party's heels */
@@ -114,7 +186,7 @@ body {
   left: 100%;
   width: 18px;
   height: 4px;
-  background: #e8e2d0;
+  background: #5c4630;
   box-shadow: -8px 0 0 0 #8a5a2b;
   animation: fx-fly 0.8s linear forwards;
 }
@@ -132,7 +204,7 @@ body {
 
 @keyframes fx-fly {
   from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(140px); opacity: 0; }
+  to { transform: translateX(170px); opacity: 0; }
 }
 
 /* knight: sword slash arc */
@@ -141,8 +213,8 @@ body {
   left: 85%;
   width: 24px;
   height: 24px;
-  border-top: 4px solid #f5d67b;
-  border-right: 4px solid #f5d67b;
+  border-top: 4px solid #c9971f;
+  border-right: 4px solid #c9971f;
   border-top-right-radius: 100%;
   animation: fx-slash 0.5s ease-out forwards;
 }
@@ -158,10 +230,10 @@ body {
   left: 40%;
   width: 6px;
   height: 6px;
-  background: #f5d67b;
+  background: #d9a832;
   box-shadow:
     14px 8px 0 0 #fff7d6,
-    -12px 10px 0 0 #f5d67b;
+    -12px 10px 0 0 #d9a832;
   animation: fx-heal 0.9s ease-out forwards;
 }
 
@@ -180,5 +252,10 @@ body {
   }
   .pixel-party {
     display: none;
+  }
+  .sky-cycle,
+  .sun,
+  .moon {
+    animation: none;
   }
 }

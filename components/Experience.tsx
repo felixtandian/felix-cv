@@ -172,7 +172,7 @@ function LootCard({ loot }: { loot: Loot }) {
   return (
     <motion.div
       whileHover={{ y: -4 }}
-      className="border border-gold/25 bg-black/30 p-3 transition-shadow hover:shadow-[0_0_12px_rgb(212_175_55_/_0.25)]"
+      className="border border-gold/25 bg-gold/10 p-3 transition-shadow hover:shadow-[0_0_12px_rgb(212_175_55_/_0.35)]"
     >
       <p className="font-display text-sm font-bold text-amber">
         {loot.icon} {loot.title}

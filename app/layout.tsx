@@ -40,7 +40,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${cinzel.variable} ${inter.variable}`}>
-      <body className="bg-night font-body text-stone-200 antialiased">
+      <body className="bg-sky font-body text-stone-200 antialiased">
         <MotionProvider>{children}</MotionProvider>
       </body>
     </html>
