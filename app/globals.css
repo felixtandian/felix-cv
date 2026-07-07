@@ -42,6 +42,134 @@ body {
   animation: flicker 2.4s ease-in-out infinite;
 }
 
+/* --- pixel adventurer party --- */
+
+/* party walks border to border, then turns around (alternate) */
+.party-patrol {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  animation: patrol 26s linear infinite alternate;
+  will-change: transform;
+}
+
+@keyframes patrol {
+  from { transform: translateX(12px); }
+  to { transform: translateX(calc(100vw - 100% - 12px)); }
+}
+
+/* dragon chase: one sprint across the screen */
+.party-chase {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  animation: chase 8s linear forwards;
+  will-change: transform;
+}
+
+@keyframes chase {
+  from { transform: translateX(-420px); }
+  to { transform: translateX(100vw); }
+}
+
+/* the dragon flies: gentle airborne bob, wings do the rest */
+.dragon-fly {
+  animation: hover-bob 1.4s ease-in-out infinite;
+}
+
+@keyframes hover-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+
+/* dragon breath: flickering pixel flames at the party's heels */
+.fx-fire {
+  top: 40%;
+  left: 96%;
+  width: 8px;
+  height: 8px;
+  background: #ffd166;
+  box-shadow:
+    7px 2px 0 0 #ff7b00,
+    13px 0 0 0 #ff4d00,
+    9px -5px 0 0 #ff9e42;
+  animation: fx-fire 0.3s steps(2) infinite;
+}
+
+@keyframes fx-fire {
+  50% {
+    transform: translate(3px, -2px) scale(1.2);
+    filter: brightness(1.3);
+  }
+}
+
+.fx {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* archer: arrow shot forward */
+.fx-arrow {
+  top: 45%;
+  left: 100%;
+  width: 18px;
+  height: 4px;
+  background: #e8e2d0;
+  box-shadow: -8px 0 0 0 #8a5a2b;
+  animation: fx-fly 0.8s linear forwards;
+}
+
+/* mage: glowing orb */
+.fx-orb {
+  top: 25%;
+  left: 100%;
+  width: 10px;
+  height: 10px;
+  background: #7df9ff;
+  box-shadow: 0 0 10px 2px rgb(125 249 255 / 0.8);
+  animation: fx-fly 0.8s linear forwards;
+}
+
+@keyframes fx-fly {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(140px); opacity: 0; }
+}
+
+/* knight: sword slash arc */
+.fx-slash {
+  top: 5%;
+  left: 85%;
+  width: 24px;
+  height: 24px;
+  border-top: 4px solid #f5d67b;
+  border-right: 4px solid #f5d67b;
+  border-top-right-radius: 100%;
+  animation: fx-slash 0.5s ease-out forwards;
+}
+
+@keyframes fx-slash {
+  from { transform: rotate(-70deg); opacity: 1; }
+  to { transform: rotate(25deg); opacity: 0; }
+}
+
+/* priest: rising heal sparkles */
+.fx-heal {
+  top: -10px;
+  left: 40%;
+  width: 6px;
+  height: 6px;
+  background: #f5d67b;
+  box-shadow:
+    14px 8px 0 0 #fff7d6,
+    -12px 10px 0 0 #f5d67b;
+  animation: fx-heal 0.9s ease-out forwards;
+}
+
+@keyframes fx-heal {
+  from { transform: translateY(8px); opacity: 1; }
+  to { transform: translateY(-18px); opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -49,5 +177,8 @@ body {
   .torch-glow {
     animation: none;
     text-shadow: 0 0 18px rgb(212 175 55 / 0.35);
+  }
+  .pixel-party {
+    display: none;
   }
 }

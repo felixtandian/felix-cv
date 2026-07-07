@@ -56,7 +56,7 @@ export default function Hero() {
       variants={stagger}
       initial="hidden"
       animate="visible"
-      className="flex min-h-screen flex-col items-center justify-center gap-6 px-4"
+      className="relative flex min-h-screen flex-col items-center justify-center gap-6 overflow-hidden px-4"
     >
       <motion.p
         variants={popIn}
