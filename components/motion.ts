@@ -1,20 +1,5 @@
 import type { Variants } from "framer-motion";
 
-/* Sections slide in like entering a new level */
-export const slideIn = (from: "left" | "right" | "bottom" = "bottom"): Variants => ({
-  hidden: {
-    opacity: 0,
-    x: from === "left" ? -80 : from === "right" ? 80 : 0,
-    y: from === "bottom" ? 80 : 0,
-  },
-  visible: {
-    opacity: 1,
-    x: 0,
-    y: 0,
-    transition: { type: "spring", stiffness: 70, damping: 14 },
-  },
-});
-
 /* Parent container that reveals children one by one */
 export const stagger: Variants = {
   hidden: {},
@@ -28,5 +13,21 @@ export const popIn: Variants = {
     opacity: 1,
     scale: 1,
     transition: { type: "spring", stiffness: 320, damping: 16 },
+  },
+};
+
+/* Section titles pop in letter by letter */
+export const letterContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.045 } },
+};
+
+export const letterPop: Variants = {
+  hidden: { opacity: 0, y: 14, scale: 0.6 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring", stiffness: 350, damping: 18 },
   },
 };

@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, type Variants } from "framer-motion";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { popIn, stagger } from "./motion";
 import StatBar from "./StatBar";
 import Tilt from "./Tilt";
@@ -11,42 +12,58 @@ const contacts = [
   { label: "linkedin.com/in/felixtandian", href: "https://linkedin.com/in/felixtandian" },
 ];
 
-/* game-title-card reveal: letters spring in one by one */
-const letterContainer: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.05, delayChildren: 0.15 } },
-};
+const NAME = "FELIX TANDIAN";
+const SUBTITLE = "Lv.28 · Frontend & Mobile App Developer";
+const TOTAL = NAME.length + SUBTITLE.length;
 
-const letter: Variants = {
-  hidden: { opacity: 0, y: 50, scale: 0.7 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { type: "spring", stiffness: 300, damping: 20 },
-  },
-};
+/* JRPG dialog: the text types itself out, then a gold cursor blinks */
+function DialogText() {
+  const [n, setN] = useState(0);
 
-function TitleName({ text }: { text: string }) {
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setN(TOTAL);
+      return;
+    }
+    let id: ReturnType<typeof setInterval>;
+    /* wait for the window-open wipe before typing */
+    const start = setTimeout(() => {
+      let c = 0;
+      id = setInterval(() => {
+        c += 1;
+        setN(c);
+        if (c >= TOTAL) clearInterval(id);
+      }, 45);
+    }, 500);
+    return () => {
+      clearTimeout(start);
+      clearInterval(id);
+    };
+  }, []);
+
+  const nameLen = Math.min(n, NAME.length);
+  const subLen = Math.max(0, n - NAME.length);
+  const done = n >= TOTAL;
+
   return (
-    <motion.h1
-      variants={letterContainer}
-      className="torch-glow text-center font-display text-[clamp(3rem,11vw,7.5rem)] font-bold leading-none tracking-wide text-amber"
-      aria-label={text}
-    >
-      {text.split(" ").map((word) => (
-        <span
-          key={word}
-          className="mr-[0.3em] inline-block whitespace-nowrap last:mr-0"
-        >
-          {word.split("").map((ch, i) => (
-            <motion.span key={i} variants={letter} className="inline-block">
-              {ch}
-            </motion.span>
-          ))}
+    <div aria-label={`${NAME} — ${SUBTITLE}`} className="relative">
+      <h1
+        aria-hidden
+        className="sky-ink font-display text-[clamp(1.25rem,4.5vw,2.5rem)] leading-relaxed text-gold"
+      >
+        {NAME.slice(0, nameLen)}
+        {!done && nameLen < NAME.length && <span className="blink">_</span>}
+      </h1>
+      <p aria-hidden className="mt-4 min-h-[1.5em] text-sm text-stone-200 sm:text-base">
+        {SUBTITLE.slice(0, subLen)}
+        {!done && subLen > 0 && <span className="blink">_</span>}
+      </p>
+      {done && (
+        <span aria-hidden className="blink absolute -bottom-1 right-0 text-gold">
+          ▶
         </span>
-      ))}
-    </motion.h1>
+      )}
+    </div>
   );
 }
 
@@ -60,25 +77,18 @@ export default function Hero() {
     >
       <motion.p
         variants={popIn}
-        className="font-display text-sm tracking-[0.3em] text-gold/70"
+        className="sky-ink font-display text-[10px] text-gold/80"
       >
         ⚔ CHARACTER SHEET ⚔
       </motion.p>
 
-      <TitleName text="FELIX TANDIAN" />
+      <div className="w-full max-w-xl">
+        <Tilt className="panel px-6 py-6 sm:px-8">
+          <DialogText />
+        </Tilt>
+      </div>
 
-      <motion.p variants={popIn} className="text-gold/50">
-        ───── ❖ ─────
-      </motion.p>
-
-      <motion.p
-        variants={popIn}
-        className="text-center font-display text-base tracking-wider text-stone-300 sm:text-xl"
-      >
-        Lv.28 · Frontend & Mobile App Developer
-      </motion.p>
-
-      <motion.div variants={popIn} className="mt-4 w-full max-w-xl">
+      <div className="w-full max-w-xl">
         <Tilt className="panel p-6 sm:p-8">
           <div className="flex flex-col gap-3">
             <StatBar label="HP" value={10} color="bg-hp" note="100" />
@@ -87,32 +97,32 @@ export default function Hero() {
           <ul className="mt-6 flex flex-col items-center gap-2 text-sm text-stone-400 sm:flex-row sm:justify-center sm:gap-6">
             {contacts.map((c) => (
               <li key={c.label}>
-                <a href={c.href} className="transition-colors hover:text-amber">
+                <a href={c.href} className="transition-colors hover:text-gold">
                   {c.label}
                 </a>
               </li>
             ))}
           </ul>
         </Tilt>
-      </motion.div>
+      </div>
 
-      <motion.div variants={popIn} className="mt-4 flex flex-wrap justify-center gap-4">
+      <motion.div variants={popIn} className="mt-2 flex flex-wrap justify-center gap-4">
         <motion.a
           href="#skills"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="inline-block border border-gold/60 bg-gold/10 px-8 py-3 font-display text-sm tracking-widest text-amber transition-colors hover:bg-gold/20"
+          className="sky-ink inline-block rounded-md border-2 border-stone-100/60 bg-[#141f5c]/70 px-6 py-3 font-display text-[11px] text-stone-100 transition-colors hover:border-gold hover:text-gold"
         >
-          ▶ VIEW QUEST LOG
+          VIEW QUEST LOG
         </motion.a>
         <motion.a
           href="/resume.pdf"
           download="Felix-Tandian-Resume.pdf"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="inline-block border border-gold/40 px-8 py-3 font-display text-sm tracking-widest text-stone-300 transition-colors hover:border-gold/70 hover:text-amber"
+          className="sky-ink inline-block rounded-md border-2 border-stone-100/40 px-6 py-3 font-display text-[11px] text-stone-200 transition-colors hover:border-gold hover:text-gold"
         >
-          📜 DOWNLOAD RESUME
+          DOWNLOAD RESUME
         </motion.a>
       </motion.div>
     </motion.header>

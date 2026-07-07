@@ -41,8 +41,8 @@ const quests = [
   {
     type: "SIDE QUEST",
     status: "CLEARED",
-    company: "CV. Tehnik Pompa — Service Management System",
-    role: "Project Lead · Team of 3 · Next.js, TypeScript, Prisma, PostgreSQL, Docker",
+    company: "Project Lead — Service Management System",
+    role: "Team of 3 · Next.js, TypeScript, Prisma, PostgreSQL, Docker",
     period: "07/2025 — 12/2025",
     loot: [
       {
@@ -86,8 +86,8 @@ const quests = [
   {
     type: "SIDE QUEST",
     status: "CLEARED",
-    company: "CV. Tehnik Pompa",
-    role: "Full Stack Developer",
+    company: "Full Stack Developer",
+    role: "Flutter mobile application",
     period: "09/2022 — 12/2022",
     loot: [
       {
@@ -129,8 +129,8 @@ const quests = [
   {
     type: "SIDE QUEST",
     status: "CLEARED",
-    company: "CV. Tehnik Pompa",
-    role: "Full Stack Developer",
+    company: "Full Stack Developer",
+    role: "Java Android applications",
     period: "02/2020 — 08/2020",
     loot: [
       {
@@ -174,7 +174,7 @@ function LootCard({ loot }: { loot: Loot }) {
       whileHover={{ y: -4 }}
       className="border border-gold/25 bg-gold/10 p-3 transition-shadow hover:shadow-[0_0_12px_rgb(212_175_55_/_0.35)]"
     >
-      <p className="font-display text-sm font-bold text-amber">
+      <p className="font-display text-[10px] leading-relaxed text-amber">
         {loot.icon} {loot.title}
       </p>
       <p className="mt-1 text-sm leading-relaxed text-stone-400">{loot.detail}</p>
@@ -187,16 +187,16 @@ export default function Experience() {
   const visible = quests.filter((q) => filter === "ALL" || q.type === filter);
 
   return (
-    <Section id="experience" title="QUEST LOG" from="right">
+    <Section id="experience" title="QUEST LOG">
       <div className="mb-8 flex flex-wrap justify-center gap-2">
         {tabs.map((t) => (
           <button
             key={t}
             onClick={() => setFilter(t)}
-            className={`border px-4 py-2 font-display text-xs tracking-widest transition-colors ${
+            className={`sky-ink border px-4 py-2 font-display text-[10px] transition-colors ${
               filter === t
-                ? "border-gold bg-gold/15 text-amber"
-                : "border-gold/30 text-stone-400 hover:border-gold/60 hover:text-stone-200"
+                ? "border-gold bg-gold/15 text-gold"
+                : "border-stone-400/40 text-stone-300 hover:border-gold/60 hover:text-gold"
             }`}
           >
             {t}
@@ -217,11 +217,11 @@ export default function Experience() {
             >
               <Tilt className="panel p-5 sm:p-6">
                 <div className="mb-3 flex flex-wrap items-center gap-3">
-                  <span className="font-display text-xs tracking-widest text-gold">
+                  <span className="font-display text-[10px] text-gold">
                     ◆ {q.type}
                   </span>
                   <span
-                    className={`border px-2 py-0.5 font-display text-[10px] tracking-widest ${
+                    className={`border px-2 py-0.5 font-display text-[8px] ${
                       q.status === "ACTIVE"
                         ? "border-amber/60 text-amber"
                         : "border-stone-500/50 text-stone-400"
@@ -231,7 +231,7 @@ export default function Experience() {
                   </span>
                   <span className="ml-auto text-xs text-stone-500">{q.period}</span>
                 </div>
-                <h3 className="font-display text-lg font-bold text-stone-100">
+                <h3 className="font-display text-sm text-stone-100 sm:text-base">
                   {q.company}
                 </h3>
                 <p className="mb-4 text-sm text-amber/90">{q.role}</p>

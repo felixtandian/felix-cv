@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
-import { Cinzel, Inter } from "next/font/google";
+import { Press_Start_2P, DotGothic16 } from "next/font/google";
 import MotionProvider from "@/components/MotionProvider";
 import "./globals.css";
 
-const cinzel = Cinzel({
+const pixel = Press_Start_2P({
+  weight: "400",
   subsets: ["latin"],
-  variable: "--font-cinzel",
+  variable: "--font-pixel",
 });
 
-const inter = Inter({
+const dot = DotGothic16({
+  weight: "400",
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-dot",
 });
 
 const description =
@@ -39,7 +41,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${cinzel.variable} ${inter.variable}`}>
+    <html lang="en" className={`${pixel.variable} ${dot.variable}`}>
       <body className="bg-sky font-body text-stone-200 antialiased">
         <MotionProvider>{children}</MotionProvider>
       </body>

@@ -17,16 +17,16 @@ const coursework = [
 
 export default function Education() {
   return (
-    <Section id="education" title="TRAINING GROUNDS" from="left">
+    <Section id="education" title="TRAINING GROUNDS">
       <Tilt className="panel p-6 text-center sm:p-8">
-        <p className="font-display text-lg font-bold tracking-wider text-stone-100">
+        <p className="font-display text-xs leading-relaxed text-stone-100 sm:text-sm">
           UNIVERSITY OF BINA NUSANTARA
         </p>
         <p className="mt-2 text-sm text-stone-400">
           Master of Information Technology · Bachelor of Computer Science (2021)
         </p>
 
-        <p className="mt-8 font-display text-sm tracking-widest text-gold/70">
+        <p className="mt-8 font-display text-[10px] text-gold/80">
           ABILITIES LEARNED
         </p>
         <motion.ul
