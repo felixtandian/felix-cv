@@ -22,7 +22,7 @@ export default function Education() {
           UNIVERSITY OF BINA NUSANTARA
         </p>
         <p className="mt-2 text-sm text-stone-400">
-          Bachelor of Computer Science · Master of Information Technology (2021)
+          Master of Information Technology · Bachelor of Computer Science (2021)
         </p>
 
         <p className="mt-8 font-display text-sm tracking-widest text-gold/70">
