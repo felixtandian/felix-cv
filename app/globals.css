@@ -320,6 +320,17 @@ body {
   50% { opacity: 0.25; }
 }
 
+/* konami reward: rockets accelerate off the top of the screen */
+.rocket-up {
+  transform: translateY(120px);
+  animation: rocket-up 1.6s ease-in forwards;
+}
+
+@keyframes rocket-up {
+  from { transform: translateY(120px); }
+  to { transform: translateY(-110vh); }
+}
+
 /* save-point crystal: slow bob with a gold pulse */
 .save-crystal {
   display: inline-block;
@@ -343,7 +354,8 @@ body {
   }
   .airship-fly,
   .balloon-fly,
-  .bat-flock {
+  .bat-flock,
+  .rocket-up {
     display: none;
   }
   .stars-sm,

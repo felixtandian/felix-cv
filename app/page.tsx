@@ -6,6 +6,7 @@ import NightSky from "@/components/NightSky";
 import Sprite from "@/components/Sprite";
 import XpBar from "@/components/XpBar";
 import MenuCursor from "@/components/MenuCursor";
+import KonamiCode from "@/components/KonamiCode";
 
 /* save-point crystal — the reward for scrolling to the end */
 const crystal = [
@@ -23,6 +24,7 @@ export default function Home() {
       <NightSky />
       <XpBar />
       <MenuCursor />
+      <KonamiCode />
       <Hero />
       <Skills />
       <Experience />

@@ -10,6 +10,7 @@ const contacts = [
   { label: "+62 856 2700 888", href: "tel:+628562700888" },
   { label: "tandianfelix13@gmail.com", href: "mailto:tandianfelix13@gmail.com" },
   { label: "linkedin.com/in/felixtandian", href: "https://linkedin.com/in/felixtandian" },
+  { label: "github.com/felixtandian", href: "https://github.com/felixtandian" },
 ];
 
 const NAME = "FELIX TANDIAN";
@@ -94,7 +95,7 @@ export default function Hero() {
             <StatBar label="HP" value={10} color="bg-hp" note="100" />
             <StatBar label="XP" value={8} color="bg-gold" note="6 yrs" />
           </div>
-          <ul className="mt-6 flex flex-col items-center gap-2 text-sm text-stone-400 sm:flex-row sm:justify-center sm:gap-6">
+          <ul className="mt-6 flex flex-col items-center gap-2 text-sm text-stone-400 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-6 sm:gap-y-2">
             {contacts.map((c) => (
               <li key={c.label}>
                 <a href={c.href} className="transition-colors hover:text-gold">
